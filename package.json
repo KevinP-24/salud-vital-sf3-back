@@ -1,0 +1,32 @@
+{
+  "name": "sf3-back",
+  "version": "1.0.0",
+  "description": "Backend de VitalApp (Salud Vital) - Proyecto DevOps Universidad del Quindío",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"No hay pruebas definidas aún\" && exit 0"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "supabase",
+    "postgresql",
+    "devops",
+    "vitalapp"
+  ],
+  "author": "Universidad del Quindío - Ingeniería de Software III",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.75.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
