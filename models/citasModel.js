@@ -34,5 +34,14 @@ export const CitaModel = {
   async delete(id) {
     await pool.query('DELETE FROM citas WHERE id = $1', [id])
     return { message: 'Cita eliminada correctamente' }
+  },
+
+  // 👇 Nuevo método para obtener detalles (paciente_correo, medico_correo, etc.)
+  async getDetalleById(id) {
+    const { rows } = await pool.query(
+      `SELECT * FROM vw_citas_detalle WHERE id = $1`,
+      [id]
+    )
+    return rows[0]
   }
 }

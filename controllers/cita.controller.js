@@ -1,4 +1,6 @@
 import { CitaModel } from '../models/citasModel.js'
+import { sendEmail } from '../services/emailService.js'
+import { pool } from '../db.js'
 
 export const CitasController = {
   async getAll(req, res) {
@@ -26,6 +28,43 @@ export const CitasController = {
   async create(req, res) {
     try {
       const nueva = await CitaModel.create(req.body)
+
+      // === Correos automáticos (se obtienen desde BD) ===
+      try {
+        const { rows } = await pool.query(
+          `SELECT
+             COALESCE(p.email, p.correo) AS paciente_correo,
+             COALESCE(m.email, m.correo) AS medico_correo
+           FROM citas c
+           JOIN pacientes p ON p.id = c.paciente_id
+           JOIN medicos   m ON m.id = c.medico_id
+           WHERE c.id = $1`,
+          [nueva.id]
+        )
+
+        const to = [rows[0]?.paciente_correo, rows[0]?.medico_correo].filter(Boolean)
+
+        if (to.length) {
+          await sendEmail({
+            to,
+            subject: '🩺 Nueva cita agendada',
+            title: 'Tu cita ha sido registrada exitosamente',
+            text:
+`Notifica: VitalApp
+Paciente ID: ${nueva.paciente_id}
+Médico ID: ${nueva.medico_id}
+Fecha: ${new Date(nueva.fecha_cita).toLocaleString()}`,
+            accent: '#2c7be5'
+          })
+          console.log('📧 Notificación de cita enviada a:', to.join(', '))
+        } else {
+          console.log('ℹ️ Cita creada, pero no se encontraron correos para notificar.')
+        }
+      } catch (e) {
+        console.error('⚠️ Error al enviar notificación de cita:', e)
+      }
+      // ================================================
+
       res.status(201).json(nueva)
     } catch (err) {
       console.error('❌ Error al crear cita:', err)
