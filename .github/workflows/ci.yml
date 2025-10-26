@@ -1,10 +1,10 @@
-name: Node.js CI
+name: Node.js Backend CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]   # Tu repo usa "master", no "main"
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -22,5 +22,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Start app (for build check)
+      # Si no tienes script de build, no pasa nada.
+      - name: Build or check app
         run: npm run build || echo "No build script found"
+
+      # Opcional: puedes agregar este paso si quieres comprobar que inicia sin errores
+      # - name: Start server (health check)
+      #   run: node server.js || echo "Server started successfully"
