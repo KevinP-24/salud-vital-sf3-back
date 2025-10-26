@@ -29,16 +29,18 @@ export const CitasController = {
     try {
       const nueva = await CitaModel.create(req.body)
 
-      // === Correos automáticos (se obtienen desde BD) ===
+      // === Correos automáticos (desde BD) ===
       try {
         const { rows } = await pool.query(
-          `SELECT
-             COALESCE(p.email, p.correo) AS paciente_correo,
-             COALESCE(m.email, m.correo) AS medico_correo
-           FROM citas c
-           JOIN pacientes p ON p.id = c.paciente_id
-           JOIN medicos   m ON m.id = c.medico_id
-           WHERE c.id = $1`,
+          `SELECT 
+            up.correo AS paciente_correo,
+            um.correo AS medico_correo
+          FROM citas c
+          JOIN pacientes p ON p.id = c.paciente_id
+          JOIN usuarios  up ON up.id = p.usuario_id
+          JOIN medicos   m ON m.id = c.medico_id
+          JOIN usuarios  um ON um.id = m.usuario_id
+          WHERE c.id = $1`,
           [nueva.id]
         )
 
@@ -50,10 +52,10 @@ export const CitasController = {
             subject: '🩺 Nueva cita agendada',
             title: 'Tu cita ha sido registrada exitosamente',
             text:
-`Notifica: VitalApp
-Paciente ID: ${nueva.paciente_id}
-Médico ID: ${nueva.medico_id}
-Fecha: ${new Date(nueva.fecha_cita).toLocaleString()}`,
+  `Notifica: VitalApp
+  Paciente ID: ${nueva.paciente_id}
+  Médico ID: ${nueva.medico_id}
+  Fecha: ${new Date(nueva.fecha_cita).toLocaleString()}`,
             accent: '#2c7be5'
           })
           console.log('📧 Notificación de cita enviada a:', to.join(', '))
@@ -63,7 +65,7 @@ Fecha: ${new Date(nueva.fecha_cita).toLocaleString()}`,
       } catch (e) {
         console.error('⚠️ Error al enviar notificación de cita:', e)
       }
-      // ================================================
+      // ======================================
 
       res.status(201).json(nueva)
     } catch (err) {
