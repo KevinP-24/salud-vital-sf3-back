@@ -1,22 +1,15 @@
-import pkg from 'pg'
-import dotenv from 'dotenv'
+import pkg from 'pg';
+import dotenv from 'dotenv';
+dotenv.config();
 
-dotenv.config()
-const { Pool } = pkg
-
-console.log('🧩 DATABASE_URL:', process.env.DATABASE_URL)
+const { Pool } = pkg;
 
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
-})
+});
 
 pool.on('connect', async client => {
-  console.log('✅ Conexión establecida con la BD')
-  await client.query('SET search_path TO vitalapp;')
-})
-
-
-pool.on('error', err => {
-  console.error('❌ Error en la conexión con PostgreSQL:', err)
-})
+  await client.query('SET search_path TO vitalapp;');
+  console.log('✅ Conectado a Supabase correctamente');
+});
